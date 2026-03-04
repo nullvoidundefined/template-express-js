@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      run: npm run lint
+    format:
+      run: npm run format:check
+
+pre-push:
+  commands:
+    tests:
+      run: npm run test:coverage
