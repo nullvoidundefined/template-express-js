@@ -1,4 +1,4 @@
-# template-express
+# template-express-js
 
 Minimal Express 5 + TypeScript + PostgreSQL starter API with authentication, security middleware, logging, and testing preconfigured.
 
