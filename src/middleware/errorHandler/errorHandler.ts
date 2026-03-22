@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { isProduction } from "app/config/env.js";
 import { logger } from "app/utils/logs/logger.js";
 
 // Centralized error handler to ensure all uncaught errors are logged once and surfaced with a safe JSON response.
@@ -8,7 +9,7 @@ import { logger } from "app/utils/logs/logger.js";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- 4th arg required so Express recognizes this as error-handling middleware
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   const status = 500;
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = isProduction();
 
   logger.error({ err, reqId: req.id }, "Unhandled error in request handler");
 

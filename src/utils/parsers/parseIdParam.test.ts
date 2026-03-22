@@ -24,6 +24,12 @@ describe("parseIdParam", () => {
     expect(parseIdParam([])).toBe(null);
   });
 
+  it("accepts UUID v7", () => {
+    // UUID v7: timestamp-based, version nibble = 7
+    const v7 = "01912b6c-7c00-7000-8000-000000000000";
+    expect(parseIdParam(v7)).toBe(v7);
+  });
+
   it("uses first element when array", () => {
     expect(parseIdParam(["550e8400-e29b-41d4-a716-446655440000"])).toBe(
       "550e8400-e29b-41d4-a716-446655440000",

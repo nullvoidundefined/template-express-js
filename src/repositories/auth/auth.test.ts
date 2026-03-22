@@ -166,6 +166,34 @@ describe("auth repository", () => {
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("DELETE FROM sessions"), [id]);
   });
 
+  it("deleteExpiredSessions deletes and returns count", async () => {
+    mockQuery.mockResolvedValueOnce(mockResult([], 3));
+    const count = await authRepo.deleteExpiredSessions();
+    expect(count).toBe(3);
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("DELETE FROM sessions"));
+  });
+
+  it("loginUser deletes old sessions and creates new one in transaction", async () => {
+    mockQuery
+      .mockResolvedValueOnce(mockResult([], 1)) // delete old sessions
+      .mockResolvedValueOnce(mockResult([], 1)); // insert new session
+    const token = await authRepo.loginUser(id);
+    expect(typeof token).toBe("string");
+    expect(token).toHaveLength(64);
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("DELETE FROM sessions"),
+      [id],
+      mockClient,
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("INSERT INTO sessions"),
+      [expect.any(String), id, expect.any(Date)],
+      mockClient,
+    );
+  });
+
   it("createUserAndSession runs user and session inserts in transaction", async () => {
     const userRow = {
       id,

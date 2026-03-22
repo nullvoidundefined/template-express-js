@@ -7,6 +7,7 @@ import express from "express";
 import helmet from "helmet";
 
 import { corsConfig } from "app/config/corsConfig.js";
+import { isProduction } from "app/config/env.js";
 import pool, { query } from "app/db/pool/pool.js";
 import { csrfGuard } from "app/middleware/csrfGuard/csrfGuard.js";
 import { errorHandler } from "app/middleware/errorHandler/errorHandler.js";
@@ -22,7 +23,7 @@ function validateEnv(): void {
     console.error("Fatal: DATABASE_URL is required");
     process.exit(1);
   }
-  if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGIN) {
+  if (isProduction() && !process.env.CORS_ORIGIN) {
     console.error("Fatal: CORS_ORIGIN is required in production");
     process.exit(1);
   }
@@ -30,6 +31,10 @@ function validateEnv(): void {
 
 const app = express();
 const REQUEST_TIMEOUT_MS = 30_000;
+
+// Trust the first hop (reverse proxy / load balancer) so req.ip, req.protocol, and rate limiting work
+// correctly with X-Forwarded-For / X-Forwarded-Proto headers. Set to the number of trusted proxy hops.
+app.set("trust proxy", 1);
 
 // Add security-related HTTP headers to reduce common web vulnerabilities (XSS, clickjacking, MIME sniffing, etc.).
 app.use(helmet());

@@ -1,5 +1,6 @@
 import pg from "pg";
 
+import { isProduction } from "app/config/env.js";
 import { logger } from "app/utils/logs/logger.js";
 
 const { Pool } = pg;
@@ -12,10 +13,9 @@ const pool = new Pool({
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
   statement_timeout: 10_000,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== "false" }
-      : { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === "true" },
+  ssl: isProduction()
+    ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== "false" }
+    : { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === "true" },
 });
 
 /** Instrumented query wrapper. Logs SQL text and duration in non-production environments. */

@@ -14,7 +14,7 @@ vi.mock("app/handlers/auth/auth.js", () => ({
   logout: (_: express.Request, res: express.Response) => res.status(204).send(),
   me: (_: express.Request, res: express.Response) => res.status(200).json({ ok: true }),
 }));
-vi.mock("app/utils/rateLimiter.js", () => ({
+vi.mock("app/middleware/rateLimiter/rateLimiter.js", () => ({
   authRateLimiter: (_: express.Request, __: express.Response, next: express.NextFunction) => next(),
 }));
 
