@@ -91,7 +91,8 @@ app.use("/auth", authRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const PORT = process.env.PORT ?? 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = "0.0.0.0";
 
 const entryPath = process.argv[1];
 const isEntryModule =
@@ -100,7 +101,23 @@ const isEntryModule =
 
 if (isEntryModule) {
   validateEnv();
-  const server = app.listen(PORT, () => logger.info({ port: PORT }, "Server running"));
+
+  pool.on("error", (err) => {
+    logger.error({ err }, "Unexpected idle-client error in pg pool");
+  });
+
+  process.on("uncaughtException", (err) => {
+    logger.fatal({ err }, "Uncaught exception – shutting down");
+    logger.flush();
+    process.exit(1);
+  });
+  process.on("unhandledRejection", (reason) => {
+    logger.fatal({ reason }, "Unhandled rejection – shutting down");
+    logger.flush();
+    process.exit(1);
+  });
+
+  const server = app.listen(PORT, HOST, () => logger.info({ port: PORT }, "Server running"));
 
   async function shutdown(signal: string) {
     logger.info({ signal }, "Shutting down gracefully");
