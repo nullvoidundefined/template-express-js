@@ -98,12 +98,16 @@ export async function deleteExpiredSessions(): Promise<number> {
 }
 
 /**
- * Deletes existing sessions and creates a new one in a single transaction.
- * Mirrors createUserAndSession — ensures login never leaves the user with a dangling session.
+ * Cleans up expired sessions and creates a new one in a single transaction.
+ * Allows concurrent sessions across devices — only expired sessions are removed.
  */
 export async function loginUser(userId: string): Promise<string> {
   return withTransaction(async (client) => {
-    await query("DELETE FROM sessions WHERE user_id = $1", [userId], client);
+    await query(
+      "DELETE FROM sessions WHERE user_id = $1 AND expires_at <= NOW()",
+      [userId],
+      client,
+    );
     return createSession(userId, client);
   });
 }

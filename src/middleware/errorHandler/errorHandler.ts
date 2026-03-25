@@ -8,7 +8,12 @@ import { logger } from "app/utils/logs/logger.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- 4th arg required so Express recognizes this as error-handling middleware
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
-  const status = 500;
+  const status =
+    err && typeof err === "object" && "status" in err && typeof err.status === "number"
+      ? err.status
+      : err && typeof err === "object" && "statusCode" in err && typeof err.statusCode === "number"
+        ? err.statusCode
+        : 500;
   const isProd = isProduction();
 
   logger.error({ err, reqId: req.id }, "Unhandled error in request handler");
